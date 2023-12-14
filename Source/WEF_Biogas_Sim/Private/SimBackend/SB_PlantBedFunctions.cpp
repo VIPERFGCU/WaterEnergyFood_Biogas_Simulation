@@ -7,17 +7,24 @@ void USB_PlantBedFunctions::getGrowthAmount(
 	// Input parameters.
 	const float deltaTime,
 	const float liquidConsumptionCoeff,
+	const float nutrientUsageCoeff,
 	const float plantGrowthCoeff,
     const float plantCount, // float for simplicity in calculations - Jordan
 	const float liquidAvailable,
 	const float currentPlantHeight,
 	const float maxPlantHeight,
+	const float nutrientRatio,
 	// Output parameters.
 	float& liquidConsumed,
-	float& plantGrowthAmount
+	float& plantGrowthAmount,
+	float& nutrientConsumed
 ) {
+	float nutrients = nutrientRatio;
+	// Ensure nutrient multiplier is less than or equal to 1.05
+	if (nutrients > 1.05) nutrients = 1.05;
+
     // Convert input rate (days) to seconds for calculations
-    double fullPlantGrowthCoeff = plantGrowthCoeff / (3600.0 * 24.0 * 6); // Factor of 6 to reduce plant growth speed to be where it should  be
+    double fullPlantGrowthCoeff = nutrients * plantGrowthCoeff / (3600.0 * 24.0 * 6); // Factor of 6 to reduce plant growth speed to be where it should  be
     double fullLiquidConsumptionCoeff = liquidConsumptionCoeff / (3600.0 * 24.0);
 
     // Create temporary 64-bit floating point numbers for the math
@@ -60,6 +67,8 @@ void USB_PlantBedFunctions::getGrowthAmount(
 	// Truncate results back to 32-bit floating point numbers for Unreal Engine
 	plantGrowthAmount = plantGrowthAmountDouble;
 	liquidConsumed = liquidConsumedDouble;
+
+	nutrientConsumed = liquidConsumedDouble * nutrientUsageCoeff;
 
 	return;
 }
