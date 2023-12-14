@@ -8,7 +8,7 @@ void USB_PlantBedFunctions::getGrowthAmount(
 	const float deltaTime,
 	const float liquidConsumptionCoeff,
 	const float plantGrowthCoeff,
-     const float plantCount,
+    const float plantCount, // float for simplicity in calculations - Jordan
 	const float liquidAvailable,
 	const float currentPlantHeight,
 	const float maxPlantHeight,
@@ -17,7 +17,7 @@ void USB_PlantBedFunctions::getGrowthAmount(
 	float& plantGrowthAmount
 ) {
     // Convert input rate (days) to seconds for calculations
-    double fullPlantGrowthCoeff = plantGrowthCoeff / (3600.0 * 24.0);
+    double fullPlantGrowthCoeff = plantGrowthCoeff / (3600.0 * 24.0 * 6); // Factor of 6 to reduce plant growth speed to be where it should  be
     double fullLiquidConsumptionCoeff = liquidConsumptionCoeff / (3600.0 * 24.0);
 
     // Create temporary 64-bit floating point numbers for the math
@@ -25,7 +25,7 @@ void USB_PlantBedFunctions::getGrowthAmount(
     double plantGrowthAmountDouble = 0.0;
 	// Ensure there is available liquid and growth height.
 	if (liquidAvailable > 0.0 && currentPlantHeight < maxPlantHeight) {
-		// Calculate coefficient ratio (i.e. liquid gallons required per foot of plant growth).
+		// Calculate coefficient ratio (i.e. liquid gallons required per foot of plant growth per plant).
 		double liquidPerPlant = fullLiquidConsumptionCoeff / fullPlantGrowthCoeff;
 
 		// Calculate prospective output parameters.
@@ -53,8 +53,8 @@ void USB_PlantBedFunctions::getGrowthAmount(
 	else {
 		// If there is either no more liquid to consume or no more height to grow,
 		// do not consume any liquid and do not grow the plants at all.
-		liquidConsumed = 0.0;
-		plantGrowthAmount = 0.0;
+		liquidConsumedDouble = 0.0;
+		plantGrowthAmountDouble = 0.0;
 	}
 
 	// Truncate results back to 32-bit floating point numbers for Unreal Engine
