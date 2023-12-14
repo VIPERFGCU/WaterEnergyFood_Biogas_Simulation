@@ -18,5 +18,9 @@
 			"Name": "FunctionalTestingEditor",
 			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"Android",
+		"WindowsNoEditor"
 	]
 }
