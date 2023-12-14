@@ -8,6 +8,7 @@ void USB_PlantBedFunctions::getGrowthAmount(
 	const float deltaTime,
 	const float liquidConsumptionCoeff,
 	const float plantGrowthCoeff,
+     const float plantCount,
 	const float liquidAvailable,
 	const float currentPlantHeight,
 	const float maxPlantHeight,
@@ -15,31 +16,38 @@ void USB_PlantBedFunctions::getGrowthAmount(
 	float& liquidConsumed,
 	float& plantGrowthAmount
 ) {
+    // Convert input rate (days) to seconds for calculations
+    double fullPlantGrowthCoeff = plantGrowthCoeff / (3600.0 * 24.0);
+    double fullLiquidConsumptionCoeff = liquidConsumptionCoeff / (3600.0 * 24.0);
+
+    // Create temporary 64-bit floating point numbers for the math
+    double liquidConsumedDouble = 0.0;
+    double plantGrowthAmountDouble = 0.0;
 	// Ensure there is available liquid and growth height.
 	if (liquidAvailable > 0.0 && currentPlantHeight < maxPlantHeight) {
 		// Calculate coefficient ratio (i.e. liquid gallons required per foot of plant growth).
-		float liquidPerPlant = liquidConsumptionCoeff / plantGrowthCoeff;
+		double liquidPerPlant = fullLiquidConsumptionCoeff / fullPlantGrowthCoeff;
 
 		// Calculate prospective output parameters.
-		liquidConsumed = deltaTime * liquidConsumptionCoeff;
-		plantGrowthAmount = deltaTime * plantGrowthCoeff;
+		liquidConsumedDouble = deltaTime * fullLiquidConsumptionCoeff * plantCount;
+		plantGrowthAmountDouble = deltaTime * fullPlantGrowthCoeff;
 
 		// Check if there is enough available liquid.
-		if (liquidConsumed > liquidAvailable) {
+		if (liquidConsumedDouble > liquidAvailable) {
 			// Reduce the liquid consumption.
-			liquidConsumed = liquidAvailable;
+			liquidConsumedDouble = liquidAvailable;
 			// Since the liquid consumption was reduced, the plant growth must also be
 			// reduced using the appropriate ratio.
-			plantGrowthAmount = liquidConsumed / liquidPerPlant;
+			plantGrowthAmountDouble = liquidConsumed / liquidPerPlant / plantCount;
 		}
 
 		// Check if there is enough available height.
-		if (currentPlantHeight + plantGrowthAmount > maxPlantHeight) {
+		if (currentPlantHeight + plantGrowthAmountDouble > maxPlantHeight) {
 			// Reduce the plant growth.
-			plantGrowthAmount = maxPlantHeight - currentPlantHeight;
+			plantGrowthAmountDouble = maxPlantHeight - currentPlantHeight;
 			// Since plant growth was reduced, the liquid consumed must also be reduced
 			// using the appropriate ratio.
-			liquidConsumed = plantGrowthAmount * liquidPerPlant;
+			liquidConsumedDouble = plantGrowthAmountDouble * liquidPerPlant * plantCount;
 		}
 	}
 	else {
@@ -48,6 +56,10 @@ void USB_PlantBedFunctions::getGrowthAmount(
 		liquidConsumed = 0.0;
 		plantGrowthAmount = 0.0;
 	}
+
+	// Truncate results back to 32-bit floating point numbers for Unreal Engine
+	plantGrowthAmount = plantGrowthAmountDouble;
+	liquidConsumed = liquidConsumedDouble;
 
 	return;
 }

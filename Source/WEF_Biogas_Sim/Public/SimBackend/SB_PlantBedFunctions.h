@@ -21,12 +21,13 @@ class WEF_BIOGAS_SIM_API USB_PlantBedFunctions : public UBlueprintFunctionLibrar
 		*
 		* This functionality was implemented as a static C++ function rather than a blueprint method of SB_PlantBed
 		* because the calculation involves nested if statments that would be unnecessarily difficult to implement
-		* using blueprints.
+		* using blueprints. Additionally, 64-bit floating-point precision is needed for several of the calculations.
 		*
 		* INPUTS:
 		*  deltaTime: the time (in seconds) that has elapsed since the previous frame
-		*  liquidConsumptionCoeff: the amount of liquid (in gallons) to consume per second
-		*  plantGrowthCoeff: the height (in feet) that the plants should grow per second
+		*  liquidConsumptionCoeff: the amount of liquid (in gallons) to consume per day per plant
+		*  plantGrowthCoeff: the height (in feet) that the plants should grow per day
+		*  plantCount: how many plants to calculate for
 		*  liquidAvailable: the amount of liquid (in gallons) that the SB_LiquidContainer has
 		*  currentPlantHeight: the current height (in feet) of the SB_PlantBed's plants
 		*  maxPlantHeight: the maximum allowable height (in feet) of the SB_PlantBed's plants
@@ -41,6 +42,7 @@ class WEF_BIOGAS_SIM_API USB_PlantBedFunctions : public UBlueprintFunctionLibrar
 			const float deltaTime,
 			const float liquidConsumptionCoeff,
 			const float plantGrowthCoeff,
+		     const float plantCount,
 			const float liquidAvailable,
 			const float currentPlantHeight,
 			const float maxPlantHeight,
